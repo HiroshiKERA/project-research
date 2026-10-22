@@ -1,0 +1,13 @@
+# 保存したモデルと、学習時に使った表記・lexerを指定する。
+model_path: runs/addition/model
+format_function: src.addition:format_problem  # モジュール名:関数名。学習時の実装を指定
+answer_function: operator:add               # 正解の計算。乗算ならoperator:mul
+lexer_config: configs/addition/lexer.yaml   # 学習時と同じlexer設定
+output_dir: runs/addition-evaluation        # CSVと図の保存先
+
+# 各桁数の全組合せで評価する。曲線には同じ桁数同士の結果を使う。
+digits: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+samples_per_cell: 100  # 桁数の組ごとの問題数。異なる数値ペアの総数が少なければ全数
+seed: 42              # 評価問題の乱数シード
+batch_size: 128       # 生成時のバッチサイズ
+max_length: 52        # 答えの生成上限（token数）。終了tokenの分も含める

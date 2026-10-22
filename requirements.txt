@@ -1,0 +1,4 @@
+calt-x==1.5.0
+transformers==4.57.1
+matplotlib>=3.8,<4
+wandb>=0.15.11

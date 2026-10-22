@@ -1,0 +1,10 @@
+# DatasetPipeline：問題と正解のペアを生成する設定
+backend: sympy             # データ生成・保存に使う実装（sympyまたはsagemath）
+save_dir: data/addition    # 生成したデータの保存先
+num_train_samples: 100000  # 学習用に生成する問題数
+num_test_samples: 1000     # 評価用に生成する問題数
+batch_size: 10000          # 一度に生成・保存する件数（学習のbatch_sizeとは別）
+n_jobs: 4                  # 生成に使う並列プロセス数
+root_seed: 42              # 問題生成の乱数シード
+save_text: true            # テキスト形式でも保存するか
+save_json: true            # JSONL形式で保存するか（1行に1件の問題と正解）

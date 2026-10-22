@@ -1,0 +1,19 @@
+# IOPipeline：語彙と、文字列をtokenに分割する方法
+vocab:
+  range:
+    numbers: ['', 0, 10]   # [接頭辞, 最小値, 最大値]。両端を含むので '0'〜'10' を登録
+  misc: ['+', '=']         # 数値以外に使うtoken
+  special_tokens:
+    pad_token: '[PAD]'    # バッチ内で系列の長さを揃えるためのtoken
+    bos_token: <s>        # 系列の開始を表すtoken
+    eos_token: </s>       # 系列の終了を表すtoken
+    unk_token: '[UNK]'    # 語彙にないtokenを表すtoken
+  flags:
+    include_base_vocab: false           # CALT既定の語彙を追加するか
+    include_base_special_tokens: false  # CALT既定の特殊tokenを追加するか
+number_policy:
+  attach_sign: false      # falseなら数値の符号を独立したtokenにする
+  digit_group: 1          # 数値を何桁ずつ区切るか（1は1桁ずつ、0は分割しない）
+  allow_float: false      # 小数の表記を扱うか
+strict: true              # 字句解析で認識できない文字があればエラーにする
+include_base_vocab: false # 字句解析器にもCALT既定の語彙を追加するか
