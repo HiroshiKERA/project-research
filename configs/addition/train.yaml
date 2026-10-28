@@ -1,6 +1,8 @@
 # ModelPipeline：モデルの構造
 model:
   model_type: decoder_only             # 前のtokenから次のtokenを予測するモデル
+  activation: gelu          # 活性化関数
+  dropout: 0.0              # dropout率
   d_model: 128                         # tokenの埋め込みと隠れ状態の次元
   num_layers: 2                        # Transformerの層数
   num_heads: 4                         # 各層のattention head数（d_modelを割り切る値）
@@ -10,14 +12,16 @@ model:
 
 # TrainerPipeline：学習と保存
 train:
-  output_dir: runs/addition  # checkpointや評価結果の保存先
+  output_dir: runs/addition  # 最終モデルと評価結果の保存先
   num_train_epochs: 10       # 学習データ全体を繰り返し使う回数
   batch_size: 256            # 学習時に1デバイスで一度に処理する問題数
   test_batch_size: 128       # 評価時に1デバイスで一度に処理する問題数
+  lr_scheduler_type: constant # 学習率を一定に保つ
+  weight_decay: 0.01          # AdamWの重み減衰
+  seed: 42                   # 学習の乱数シード
   learning_rate: 0.0003      # 学習率
   eval_strategy: epoch        # 学習途中の評価タイミング（no：行わない、epoch：各epoch末、steps：一定stepごと）
-  save_strategy: epoch       # checkpointの保存タイミング（epoch：各epoch末）
-  save_total_limit: 1        # 保持するcheckpoint数の上限
+  save_strategy: 'no'        # 途中のcheckpointは保存しない。終了後にsrc/train.pyでモデルを保存
   save_safetensors: true     # モデルの重みをsafetensors形式で保存するか
   wandb:
     project: project-research # W&Bの記録先プロジェクト名

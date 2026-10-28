@@ -1,0 +1,9 @@
+# 全手法で同じ問題・表記・生成長を使う。
+format_function: src.extension_tasks:format_problem # 学習時の表記関数
+answer_function: operator:add                      # 正解の計算
+# モデル・lexer・保存先は、選んだ学習設定から読み込む。
+digits: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] # 両入力の桁数の全組合せ
+samples_per_cell: 100                    # 各組の問題数
+seed: 42                                # 評価問題の乱数シード
+batch_size: 128                          # 一度に生成する問題数
+max_length: 52                          # 答えの生成上限

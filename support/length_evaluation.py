@@ -21,7 +21,9 @@ from transformers import PreTrainedTokenizerFast
 def load_function(name):
     """例：src.addition:format_problem、operator:add。"""
     module, function = name.split(':')
-    return getattr(importlib.import_module(module), function)
+    # NotebookでPythonファイルを編集した場合も、保存済みの定義を使う。
+    module = importlib.reload(importlib.import_module(module))
+    return getattr(module, function)
 
 
 def make_problems(digits, samples_per_cell, seed, calculate):
@@ -49,7 +51,13 @@ def restore_model(model_path, tokenizer):
     config = DecoderOnlyConfig.from_pretrained(model_path)
     if config.model_type != 'decoder_only':
         raise ValueError('この評価コードはCALTのdecoder-onlyモデル用です。')
-    model = DecoderOnlyTransformer(config)
+    experiment = getattr(config, 'extension_experiment', 'baseline')
+    if experiment in ('carry', 'sequence'):
+        from src.extension_models import CarryDecoder, SequenceLossDecoder
+        model_class = CarryDecoder if experiment == 'carry' else SequenceLossDecoder
+    else:
+        model_class = DecoderOnlyTransformer
+    model = model_class(config)
     kind = getattr(config, 'input_embedding_type', 'token')
     if kind != 'token':
         importlib.import_module('src.embeddings')
@@ -105,6 +113,7 @@ def evaluate(cfg):
                 max_length=cfg.max_length,
             ).cpu().tolist()
         for row, form, prediction, labels in zip(examples, formatted, generated, batch['labels'].tolist()):
+            # 正解のPADを除き、生成側のBOSとEOS後のバッチ用PADを除いて比較する。
             target = [t for t in labels if t != -100]
             if prediction and prediction[0] == tokenizer.bos_token_id:
                 prediction = prediction[1:]
@@ -114,7 +123,7 @@ def evaluate(cfg):
             results.append({**row, 'input': form['input'],
                             'target': tokenizer.decode(target, skip_special_tokens=True),
                             'prediction': tokenizer.decode(prediction, skip_special_tokens=True),
-                            'eos': ended, 'exact': prediction == target})
+                            'eos': ended, 'exact': ended and prediction == target})
         print(f'{min(start + cfg.batch_size, len(problems))}/{len(problems)}', flush=True)
     path = output / 'predictions.csv'
     write_csv(path, results)
@@ -147,12 +156,19 @@ def plot_results(predictions_path):
     fig, ax = plt.subplots(figsize=(7, 6))
     cmap = plt.get_cmap('viridis').copy()
     cmap.set_bad('#dddddd')
-    image = ax.imshow(matrix, origin='lower', aspect='auto', vmin=0, vmax=1, cmap=cmap)
+    image = ax.imshow(matrix, origin='lower', aspect='auto', vmin=0, vmax=1,
+                      cmap=cmap, interpolation='nearest')
     for values, setter in [(a_digits, ax.set_yticks), (b_digits, ax.set_xticks)]:
         indexes = list(range(0, len(values), max(1, (len(values) + 14) // 15)))
         if indexes[-1] != len(values) - 1:
             indexes.append(len(values) - 1)
-        setter(indexes, [values[i] for i in indexes])
+        setter(indexes, [f'{values[i]}-digit' for i in indexes])
+    # 桁数を離散的なカテゴリとして表示し、各セルの境界を区切る。
+    ax.set_xticks(np.arange(len(b_digits) + 1) - 0.5, minor=True)
+    ax.set_yticks(np.arange(len(a_digits) + 1) - 0.5, minor=True)
+    ax.grid(which='minor', color='white', linewidth=0.8)
+    ax.tick_params(which='minor', bottom=False, left=False)
+    ax.tick_params(axis='x', labelrotation=45)
     ax.set(xlabel='Digits of operand B (n)', ylabel='Digits of operand A (m)',
            title='Exact match by operand length')
     fig.colorbar(image, ax=ax, label='Exact match rate')

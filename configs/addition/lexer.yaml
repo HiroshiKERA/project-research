@@ -1,7 +1,7 @@
 # IOPipeline：語彙と、文字列をtokenに分割する方法
 vocab:
   range:
-    numbers: ['', 0, 10]   # [接頭辞, 最小値, 最大値]。両端を含むので '0'〜'10' を登録
+    numbers: ['', 0, 9]    # [接頭辞, 最小値, 最大値]。1桁ずつ扱うため '0'〜'9' のみ登録
   misc: ['+', '=']         # 数値以外に使うtoken
   special_tokens:
     pad_token: '[PAD]'    # バッチ内で系列の長さを揃えるためのtoken

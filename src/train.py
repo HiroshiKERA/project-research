@@ -1,12 +1,13 @@
 """足し算のモデルを学習・評価する。"""
-import click
-import wandb
-from omegaconf import OmegaConf
-from calt.io import IOPipeline, UserCallableLoadPreprocessor
-from calt.models import ModelPipeline
-from calt.trainer import TrainerPipeline
-from src.addition import format_problem
-from src.addition_metrics import compute_metrics
+from transformers import set_seed
+import click  # CLI引数の定義・パース
+import wandb  # 実験ログ・メトリクス記録
+from omegaconf import OmegaConf  # YAML設定の読み込み
+from calt.io import IOPipeline, UserCallableLoadPreprocessor  # データ・tokenizer構築
+from calt.models import ModelPipeline  # モデル構築
+from calt.trainer import TrainerPipeline  # 学習・評価パイプライン
+from src.addition import format_problem  # 足し算問題の前処理
+from src.addition_metrics import compute_metrics  # 評価指標（正答率など）
 
 
 @click.command()
@@ -15,6 +16,7 @@ from src.addition_metrics import compute_metrics
 def main(config_path):
     # 2. データとtokenizerを用意
     cfg = OmegaConf.load(config_path)
+    set_seed(cfg.train.seed)
     pipeline = IOPipeline.from_config(cfg.data)
     pipeline.dataset_load_preprocessor = UserCallableLoadPreprocessor(format_problem)
     io = pipeline.build()

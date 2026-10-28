@@ -1,7 +1,7 @@
 # プロジェクト研究：算術の学習
 
 [環境設定](environment-setup.md)に従って教材をGoogle Driveに置き，[CALT入門](notebooks/calt-tutorial.ipynb)をColabで開きます．
-[初日の実験・記録](notebooks/day1.ipynb)，[発展課題](notebooks/extensions.ipynb)へ進みます．
+[モデルの実行](notebooks/run.ipynb)，[発展課題](notebooks/extensions.ipynb)へ進みます．
 
 ## 編集する場所
 
@@ -14,6 +14,9 @@
 | 語彙・token化 | [configs/addition/lexer.yaml](configs/addition/lexer.yaml) |
 | モデル・学習・W&B | [configs/addition/train.yaml](configs/addition/train.yaml) |
 | 埋め込み | [src/embeddings.py](src/embeddings.py) |
+| 繰り上がりの補助ラベル | [src/carry.py](src/carry.py) |
+| 補助予測の層・lossの接続 | [src/extension_models.py](src/extension_models.py) |
+| 系列単位のloss | [src/losses.py](src/losses.py) |
 
 ## 実行
 
@@ -32,6 +35,16 @@ ColabでDriveのマウント，教材フォルダへの移動，ライブラリ�
 W&Bでは`project`・`group`・`name`が設定と一致しているか確認します．
 学習中は`eval/exact_match`と`eval/token_accuracy`，最終評価では`accuracy`を確認します．
 生成結果は出力先の`eval_results/`に保存されます．
+
+## 自主課題
+
+発展課題は[extensions.ipynb](notebooks/extensions.ipynb)の手順に沿って，生成済みデータから実験を選んで実行します．例：
+
+```python
+!bash scripts/extensions.sh configs/extensions/abacus.yaml
+```
+
+発展課題の表記は[src/extension_tasks.py](src/extension_tasks.py)，学習の入口は[src/train_extensions.py](src/train_extensions.py)です．
 
 ## 桁数別の評価
 
